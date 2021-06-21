@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from contextlib import contextmanager
 from datetime import datetime
 
-POSTGRES_DSN = "postgresql://test_graph_user:12345678@localhost:5432/test_graph"
+POSTGRES_DSN = "postgresql://test_graph_user:12345678@db:5432/test_graph"
 engine = create_engine(POSTGRES_DSN, pool_pre_ping=True)
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
