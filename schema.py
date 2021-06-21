@@ -32,14 +32,17 @@ class Query(graphene.ObjectType):
         return transactions.all()
 
     @staticmethod
-    def resolve_get_user_by_id_or_email(parent, info, user_id, user_email):
+    def resolve_get_user_by_id_or_email(parent, info, user_id=None, user_email=None):
         with session_scope() as session:
+            user = None
             if user_id is not None and user_email is not None:
-                return session.query(Users).filter(Users.id == user_id, Users.email == user_email).first()
+                user = session.query(Users).filter(Users.id == user_id, Users.email == user_email).first()
             elif user_id is not None:
-                return session.query(Users).filter(Users.id == user_id).first()
+                user = session.query(Users).filter(Users.id == user_id).first()
             elif user_email is not None:
-                return session.query(Users).filter(Users.email == user_email).first()
+                user = session.query(Users).filter(Users.email == user_email).first()
+            if user is not None:
+                return UserModel.from_orm(user)
 
 
 class CreateUser(graphene.Mutation):
@@ -50,13 +53,12 @@ class CreateUser(graphene.Mutation):
 
     @staticmethod
     def mutate(parent, info, user_details):
-        user_in = jsonable_encoder(user_details)
-        user = Users(**user_in)
         with session_scope() as session:
+            user_in = jsonable_encoder(user_details)
+            user = Users(**user_in)
             session.add(user)
             session.commit()
-            session.refresh(user)
-        return user
+            return UserModel.from_orm(user)
 
 
 class CreateTransaction(graphene.Mutation):
@@ -82,7 +84,7 @@ class CreateTransaction(graphene.Mutation):
             session.commit()
             session.refresh(transaction)
             session.refresh(user)
-        return transaction
+            return TransactionModel.from_orm(transaction)
 
 
 class Mutation(graphene.ObjectType):

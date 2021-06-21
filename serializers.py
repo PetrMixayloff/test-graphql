@@ -9,6 +9,9 @@ class UserModel(BaseModel):
     email: str
     balance: float = 0.00
 
+    class Config:
+        orm_mode = True
+
 
 class TransactionModel(BaseModel):
     id: int
@@ -17,9 +20,7 @@ class TransactionModel(BaseModel):
     date: datetime
 
     class Config:
-        json_encoders = {
-            datetime: lambda dt: dt.replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
-        }
+        orm_mode = True
 
 
 class UserGrapheneModel(PydanticObjectType):
@@ -35,10 +36,10 @@ class TransactionGrapheneModel(PydanticObjectType):
 class UserGrapheneInputModel(PydanticInputObjectType):
     class Meta:
         model = UserModel
-        exclude_fields = ('id', )
+        exclude_fields = ('id', 'balance')
 
 
 class TransactionGrapheneInputModel(PydanticInputObjectType):
     class Meta:
         model = TransactionModel
-        exclude_fields = ('id', )
+        exclude_fields = ('id', 'date')
